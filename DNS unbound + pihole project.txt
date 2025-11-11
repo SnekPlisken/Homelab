@@ -1,0 +1,106 @@
+DNS Piehold project
+
+hardware: 
+	model: intel mini-pc nuc5cpyh
+	cpu: Celeron n3060 1.6ghz
+	ram: 4gb 1600 dd3l
+	harddrive: 16gb ata sandisk ssd
+https://www.intel.com/content/www/us/en/products/sku/85254/intel-nuc-kit-nuc5cpyh/specifications.html
+https://www.intel.com/content/www/us/en/products/sku/91832/intel-celeron-processor-n3060-2m-cache-up-to-2-48-ghz/specifications.html
+
+goal: DNS server unbound + pihole on debian.
+
+
+OS: Debian 13.1.0 - 
+https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-13.1.0-amd64-netinst.iso
+
+Project step by step.
+
+tore down hardware and confirmed hardrive and ram.
+
+Chose debian for ease of use on project and lightweight install
+
+Downloaded OS from debian.org
+
+chose small installation image https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-13.1.0-amd64-netinst.iso
+
+
+get hash with powershell
+PS C:\Users\Kitkat> Get-FileHash "C:\Users\Kitkat\Downloads\debian-13.1.0-amd64-netinst.iso" -Algorithm SHA256
+
+Algorithm       Hash                                                                   Path
+---------       ----                                                                   ----
+SHA256          658B28E209B578FE788EC5867DEEBAE57B6AAC5FCE3692BBB116BAB9C65568B3       C:\Users\redacted\Downloads\deb...
+
+link for expected hashes
+https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/SHA256SUMS
+
+658b28e209b578fe788ec5867deebae57b6aac5fce3692bbb116bab9c65568b3  debian-13.1.0-amd64-netinst.iso
+ebfa0ce7fc30917b226c4f2398622933f57a7e6c1dd4ff18e892b4a0944f0136  debian-edu-13.1.0-amd64-netinst.iso
+f081cd49a65f8b6e54b60b96ca65f476a3d149205c9f851585f130c36bd1a048  debian-mac-13.1.0-amd64-netinst.iso
+
+Distro is verified
+
+Burned ISO onto USB using Rufus 4.11.2285 in ISO image mode
+
+Eject usb and connect to target nuc
+
+boot into bios =f2
+disable fastboot
+switch mode to linux
+reboot and save
+
+boot into debian installer
+no gui install
+english, american, american english
+choose ethernet for network install
+hostname: unbounddns
+domain: default choose
+set root password
+set up user:plisken and user password
+set timezone
+set up partitions>use full disk>small disk paritioning scheme
+install base system
+configure package manager> united states
+debian archive mirror>deb.debian.org>skip proxy
+participate in usage survey? no
+
+Software selection: SSH server and standard system utilities
+installation complete> continue
+
+boot into debian
+log into root
+update
+	apt update
+Install sudo
+	apt install sudo -y
+sudo permissions for plisken
+	usermod -aG plisken
+exit
+
+Log into plisken
+install depencencies
+	sudo apt install curl whiptail net-tools -y
+install unbound
+	sudo apt install unbound -y
+
+set up config file- this didn't exist had to type in manually in nano and mv to directory
+sudo systemctl start unbound
+
+install pi hole
+sSL https://install.pi-hole.net | sudo bash
+
+set static IP on router
+set upstream dns to unbound ip
+use lists
+enable quiery logging
+show everything
+
+change pihole password
+	sudo pihole setpassword
+
+confim web access to pihole on other machine - good
+
+added cloudflair as backup dns
+
+need to set up firewall to route to DNS since ATT doesnt let you change yours on the default router.
